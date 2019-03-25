@@ -1,0 +1,16 @@
+{
+  "name": "pdf-flow-rate",
+  "version": "1.0.0",
+  "description": "Serverless framework setup for AWS SQS, Lambda and S3 pdf generation and distribution.",
+  "main": "index.js",
+  "author": "Shawn Matthews",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.427.0",
+    "chrome-aws-lambda": "^1.13.0",
+    "puppeteer-core": "^1.13.0"
+  },
+  "devDependencies": {
+    "serverless-secrets-plugin": "^0.1.0"
+  }
+}

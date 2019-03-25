@@ -1,0 +1,59 @@
+service: pdf-flow-rate
+custom:
+  bucket: pdfmessagestorage
+
+plugins:
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  profile: serverless-agent
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+        - "sqs:GetQueueUrl"
+      Resource: "arn:aws:sqs:${self:provider.region}:#{AWS::AccountId}:MessageQueue"
+    - Effect: "Allow"
+      Action:
+        - "sqs:ListQueues"
+      Resource: "arn:aws:sqs:${self:provider.region}:#{AWS::AccountId}:*"
+
+functions:
+  sender: #Post from the client that adds messages to the Queue
+    handler: sender.handler
+    events:
+      - http:
+          path: v1/sender
+          method: post
+  receiver: #Event triggered Lambda from the SQS that sends messages to the processing Lambda
+    handler: receiver.handler
+    events:
+      - sqs:
+          arn:
+          #Can also be hardcoded like - arn: "arn:aws:sqs:${self:provider.region}:811338114632:MessageQueue"
+            Fn::GetAtt:
+              - MessageQueue
+              - Arn
+          batchSize: 1 #How many messages are in each batch being requested from SQS
+    reservedConcurrency: 1 #How many copies of the Reciever Lambda can run at the same time
+  pdfs3upload:
+    handler: pdfs3upload.save
+    environment:
+      BUCKET: ${self:custom.bucket}
+resources: #Generates a SQS queue named MessageQueue
+  Resources:
+    MessageQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "MessageQueue"
+    MessageStorage:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: ${self:custom.bucket}

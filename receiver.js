@@ -1,16 +1,6 @@
-exports.handler = (event, context, callback) => {
-  const response = {
-      statusCode: 200,
-      body: JSON.stringify({
-          message: 'SQS event processed.',
-          input: event,
-      }),
-  };
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
 
-  console.log('event: ', JSON.stringify(event));
-
-  var body = event.Records[0].body;
-  console.log('text: ', JSON.parse(body).text);
-
-  callback(null, response);
-};
+exports.handler = function(event, context, callback) {
+    return 'Firing post based on new S3 being found.'
+}

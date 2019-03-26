@@ -1,6 +1,6 @@
 service: pdf-flow-rate
 custom:
-  bucket: pdfmessagestorage
+  bucket: CHANGEME
 
 plugins:
   - serverless-pseudo-parameters
